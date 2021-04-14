@@ -1,26 +1,54 @@
-using System.Collections.Generic;
-
 namespace FormulaLib
 {
     internal static class BinaryBundle
     {
-        private static List<char> operation = new List<char>()
+        internal static string Disjunction { get; } = "\\/";
+        internal static string Conjunction { get; } = "/\\";
+        internal static string Equivalence { get; } = "~";
+        internal static string Implication { get; } = "->";
+
+        internal static int GetOperationIndex(string formula)
         {
-            '&', // конъюнкция
-            '|', // дизъюнкция
-            '~', // эквиваленция
-            '>'  // импликация
-        };
-        
-        internal static bool Check(char symbol)
-        {
-            foreach(char item in operation)
+            int count = 0;
+            int index = -1;
+
+            for (int i = 0; i < formula.Length; i++)
             {
-                if(symbol == item)
-                    return true;
+                if (formula[i] == '(')
+                    count++;
+
+                if (formula[i] == ')')
+                    count--;
+
+                if (count != 0)
+                    continue;
+
+                if (formula[i] == '\\' && formula[i + 1] == '/') // дизъюнкция
+                {
+                    index = i;
+                    break;
+                }
+
+                if (formula[i] == '/' && formula[i + 1] == '\\') // конъюнкция
+                {
+                    index = i;
+                    break;
+                }
+
+                if (formula[i] == '-' && formula[i + 1] == '>') // импликация
+                {
+                    index = i;
+                    break;
+                }
+
+                if (formula[i] == '~') // эквиваленция
+                {
+                    index = i;
+                    break;
+                }
             }
 
-            return false;
+            return index;
         }
     }
 }
