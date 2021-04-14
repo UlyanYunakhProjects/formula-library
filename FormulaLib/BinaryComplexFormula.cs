@@ -1,63 +1,26 @@
-using System;
-
 namespace FormulaLib
 {
     internal static class BinaryComplexFormula
     {
-        private static bool FindSubFormula(string formula, out string firstFormula, out string secondFormula, out int index)
+        internal static bool Check(string formula)
         {
-            firstFormula = "";
-            secondFormula = "";
-            index = -1;
-
             if (formula[0] != '(' || formula[formula.Length - 1] != ')')
                 return false;
 
             formula = formula.Substring(1, formula.Length - 2);
 
-            int operationIndex = GetOperationIndex(formula);
-            if (operationIndex == -1)
+            int indexStart = BinaryBundle.GetOperationIndex(formula);
+
+            if (indexStart == -1)
                 return false;
 
-            firstFormula = formula.Substring(0, operationIndex);
-            secondFormula = formula.Substring(operationIndex + 1, formula.Length - operationIndex - 1);
-            index = operationIndex + 1;
-            return true;
-        }
+            string firstFormula = formula.Substring(0, indexStart);
 
-        private static int GetOperationIndex(string formula)
-        {
-            int count = 0;
-            int index = -1;
+            int indexEnd = indexStart + 1;
+            if (formula[indexStart] == '~')
+                indexEnd--;
 
-            for (int i = 0; i < formula.Length; i++)
-            {
-                if (formula[i] == '(')
-                    count++;
-
-                if (formula[i] == ')')
-                    count--;
-
-                if (count != 0)
-                    continue;
-
-                if (BinaryBundle.Check(formula[i]))
-                {
-                    index = i;
-                    break;
-                }
-            }
-
-            return index;
-        }
-
-        internal static bool Check(string formula)
-        {
-            string firstFormula;
-            string secondFormula;
-
-            if (!FindSubFormula(formula, out firstFormula, out secondFormula, out int index))
-                return false;
+            string secondFormula = formula.Substring(indexEnd + 1, formula.Length - indexEnd - 1);
 
             bool first = Formula.Check(firstFormula);
             bool second = Formula.Check(secondFormula);
@@ -68,21 +31,39 @@ namespace FormulaLib
             return false;
         }
 
-        internal static bool CheckDNF(string formula)
+        internal static bool CheckDisjunction(string formula)
         {
-            string firstFormula;
-            string secondFormula;
-            int index;
-
-            if (!FindSubFormula(formula, out firstFormula, out secondFormula, out index))
+            if (formula[0] != '(' || formula[formula.Length - 1] != ')')
                 return false;
 
-            if (formula[index] == '&')
-                if (firstFormula.IndexOf('|') != -1 || secondFormula.IndexOf('|') != -1)
-                    return false;
+            formula = formula.Substring(1, formula.Length - 2);
 
-            bool first = Formula.CheckDNF(firstFormula);
-            bool second = Formula.CheckDNF(secondFormula);
+            int indexStart = BinaryBundle.GetOperationIndex(formula);
+
+            if (indexStart == -1)
+                return false;
+
+            string firstFormula = formula.Substring(0, indexStart);
+
+            int indexEnd = indexStart + 1;
+            if (formula[indexStart] == '~')
+                indexEnd--;
+
+            string secondFormula = formula.Substring(indexEnd + 1, formula.Length - indexEnd - 1);
+
+            if (formula[indexStart] == '-' && formula[indexStart + 1] == '>' || formula[indexStart] == '~')
+                return false;
+
+            if (formula[indexStart] == '/' && formula[indexStart + 1] == '\\')
+            {
+                if (firstFormula.IndexOf(BinaryBundle.Disjunction) != -1)
+                    return false;
+                if (secondFormula.IndexOf(BinaryBundle.Disjunction) != -1)
+                    return false;
+            }
+
+            bool first = DNF.CheckDNF(firstFormula);
+            bool second = DNF.CheckDNF(secondFormula);
 
             if (first && second)
                 return true;
