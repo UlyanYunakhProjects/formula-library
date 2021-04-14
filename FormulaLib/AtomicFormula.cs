@@ -2,7 +2,7 @@ namespace FormulaLib
 {
     internal static class AtomicFormula
     {
-        public static bool Check(string formula)
+        internal static bool Check(string formula)
         {
             if (formula.Length != 1)
                 return false;
