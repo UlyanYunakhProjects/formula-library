@@ -1,4 +1,3 @@
-using System;
 using FormulaLib;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,14 +14,18 @@ namespace Client.Controllers
         [HttpPost]
         public IActionResult Index(string text)
         {
-            bool isFormula = Formula.Check(text);
-            bool isDNF = false;
+            if (text != null)
+            {
+                bool isFormula = Formula.Check(text);
+                bool isDNF = false;
 
-            if (isFormula)
-                isDNF = DNF.Check(text);
+                if (isFormula)
+                    isDNF = DNF.Check(text);
 
-            ViewBag.IsFormula = isFormula;
-            ViewBag.IsDNF = isDNF;
+                ViewBag.IsFormula = isFormula;
+                ViewBag.IsDNF = isDNF;
+                ViewBag.Text = text;
+            }
 
             return View();
         }
